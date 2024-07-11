@@ -9,3 +9,4 @@
     <a href="http://www-infobiz.ist.osaka-u.ac.jp/en/member/matsushita/"><strong>Yasuyuki Matsushita</strong></a>
 </h3>
 This is the project page for 'Resolving Scale Ambiguity in Multi-view 3D Reconstruction using Dual-Pixel Sensors'.
+<h4 align="center">ECCV 2024</h3>

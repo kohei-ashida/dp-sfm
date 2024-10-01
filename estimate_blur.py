@@ -3,7 +3,7 @@ import glob
 
 # from run_matlab import run_matlab
 
-select_folder = "Qualitative"
+select_folder = "datasets"
 
 save_path = "blur_results"
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
                 
                     img_paths = glob.glob(f"{select_folder}/{camera_type}/{scene_name}/{f}F{fnum}/*_B.JPG")
                     print(len(img_paths))
-                    with ProcessPoolExecutor(1) as executor:
+                    with ProcessPoolExecutor(15) as executor:
                         for img_path in img_paths[:]:
                             executor.submit(exe_matlab, img_path, camera_type, select_folder, save_path)
 
@@ -41,6 +41,6 @@ if __name__ == "__main__":
                     img_paths = glob.glob(f"{select_folder}/{camera_type}/{scene_name}/{f}F{fnum}/*_B.JPG")
                     print(len(img_paths))
 
-                    with ProcessPoolExecutor(1) as executor:
+                    with ProcessPoolExecutor(15) as executor:
                         for img_path in img_paths[:]:
                             executor.submit(exe_matlab, img_path, camera_type, select_folder, save_path)

@@ -11,16 +11,15 @@ def calc_std_p(depth, stride, patch_size):
     @njit
     def main(depth, stride, patch_size):
         r, c = depth.shape
-        haba = np.zeros((r, c))
+        stds = np.zeros((r, c))
         for i in range(0, r, stride):
             for j in range(0, c, stride):
-                haba[i : i + stride, j : j + stride] = np.nanstd(
+                stds[i : i + stride, j : j + stride] = np.nanstd(
                     depth[i : i + patch_size, j : j + patch_size]
                 )
-        return haba
-
-
+        return stds
     return main(depth, stride, patch_size)
+
 def expand_mask(mask, expand_size):
     # mask is True or False
     mask = mask.copy()
@@ -77,22 +76,15 @@ class DataLoader2:
 
         if afpoint_path is not None:
             if os.path.exists(afpoint_path):
-                print(f"found AFpoint: {afpoint_path}")
                 self.afpoint = np.load(afpoint_path)
             else:
                 assert False, f"not found AFpoint: {afpoint_path}"
         else:
             self.afpoint = None
 
-        # self.__load_data()
-
-        # self.__crop_data()
-
         self.s = None
     def pixel2mm(self, pixel, resize):
-
         return pixel * self.sensor_p / resize
-
 
     def mm2pixel(self, mm, resize):
         return mm / self.pixel2mm(1, resize)
@@ -105,18 +97,12 @@ class DataLoader2:
         ), f"cocPath: {self.cocPath} is not exist"
 
         self.depth = cv2.imread(self.depthname, cv2.IMREAD_ANYDEPTH)
-        print(self.depthname)
         self.depth = self.depth.astype(np.float32)
 
         self.depth = self.depth * 1000
         self.depth[self.depth == 0] = np.nan
 
         self.depth_haba = calc_std_p(self.depth, stride=stride, patch_size=patch_size)
-
-        # Qualitativeフォルダへのパス
-        qual_path = self.cocPath.replace("Results_qualitative", "Qualitative")
-        # 最後のフォルダ名を削除
-        qual_path = qual_path[: qual_path.rfind("/")]
         err_img_path = self.imgb_path.replace("_B.JPG", "_error.JPG")
 
         if os.path.exists(err_img_path):
@@ -133,20 +119,11 @@ class DataLoader2:
             self.error_map = self.error_img[:, :, 0] != 0
             self.error_map = expand_mask(self.error_map, patch_size)
 
-
-        # if os.path.exists(self.depthname.replace("_B.tif", "_B_render.tif")):
-        #     # # render_depthの読み込み
-        #     self.render_depth = cv2.imread(self.depthname, cv2.IMREAD_ANYDEPTH)
-        #     self.render_depth = self.render_depth.astype(np.float32)
-        #     # self.render_depth[self.render_depth == 0] = np.nan
-        #     self.render_depth = self.render_depth * 1000
-
         # load reference image
         self.refIMG = cv2.imread(os.path.join(self.cocPath, "reference.png"))
         self.refIMG = cv2.cvtColor(self.refIMG, cv2.COLOR_BGR2RGB)
 
         if self.afpoint is not None:
-            # print(self.afpoint)
             x1, y1, x2, y2 = self.afpoint[0]
             # resize
             x1, y1, x2, y2 = (
@@ -206,9 +183,6 @@ class DataLoader2:
         )
         error_map = error_map | np.isnan(self.depth) | (self.depth == 0)
 
-
-        # if self.target == "231110_2" and self.focal_length == 35.0:
-        #     error_map = error_map | (self.depth < 450)
         self.x = self.depth[~error_map]
         self.y = self.blur_radius_opt[~error_map] * 2 * self.alpha  # =1
         # y_pixel = self.y.copy()
@@ -220,28 +194,21 @@ class DataLoader2:
         self.conf = self.conf.reshape(-1, 1)
 
     def close(self):
-        # self.x, self.y, self.conf, self.focal_length, self.fnum, self.resize以外を削除
         del self.depth, self.blur_radius_opt
 
-    def calc_s_and_gs(self, way="L1"):
+    def calc_s_and_gs(self):
         self.g = None
-        if way in ["L1", "lstsq"]:
-            pass
-        else:
-            raise ValueError("way must be L1 or lstsq")
 
         s, g = est.calc_s_and_gs(
             blurs=[self.y],
             depths=[self.x],
             focal_length=self.focal_length,
             fnum=self.fnum,
-            way=way,
+            way="L1",
         )
 
         est_blur = est.fn(g, self.x, self.focal_length, self.fnum, s)
         est_blur = self.mm2pixel(est_blur, resize=self.resize)
-
-
 
         if s <= 0 or g < 0 or max(est_blur) - min(est_blur) <= 2:
             self.s, self.g = None, None

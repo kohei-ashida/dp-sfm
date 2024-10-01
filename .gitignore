@@ -1,0 +1,6 @@
+__pycache__/
+/datasets/*
+!/datasets/.gitkeep
+/results
+/blur_results
+network.lic

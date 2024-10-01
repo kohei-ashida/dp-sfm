@@ -14,14 +14,8 @@ except:
 
 def L1_residual_min_cupy(A, b, max_ite=1000, tol=1.0e-8):
     print("use cupy")
-
-    # cpのattributeを表示
-    # print(f"cp.cuda.Device() = {cp.cuda.Device()}")
-
     A = cp.asarray(A)
     b = cp.asarray(b)
-    print("convert to cupy array, shape = ", A.shape)
-
     """
     L1 residual minimization by iteratively reweighted least squares (IRLS)
         minimize ||Ax - b||_1

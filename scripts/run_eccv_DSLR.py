@@ -39,7 +39,6 @@ def proccess_view(blurest_type,
         afpoint_path=af_path
     )
     # load
-    print("load")
     view.idnum = int(re.search(rf"{f}F{fnum}_(\d+)", view.cocPath).group(1))
 
     view.load_data()
@@ -52,7 +51,6 @@ def proccess_view(blurest_type,
             confidence[view.error_map] = np.nan
         confidence[(np.isnan(view.depth)) | (view.depth==0)] = np.nan
 
-        # confidence[np.isnan(confidence)] = 0
         sorted_conf = sorted(set(confidence[~np.isnan(confidence)]), reverse=True)
         T_c = sorted_conf[ round(len(sorted_conf) * 0.1) - 1 ]
     else:
@@ -82,8 +80,6 @@ def proccess_view(blurest_type,
 
     s, _ = view.calc_s_and_gs()
 
-    print(f"est s: {s}")
-
     return view
 
 
@@ -103,7 +99,7 @@ def main(coc_paths, depth_paths, imgb_paths, af_paths, f, fnum, FOR_SUPP=False):
     print("ok")
 
     if True:
-        with ProcessPoolExecutor(max_workers=1) as executor:
+        with ProcessPoolExecutor(max_workers=15) as executor:
             futures = []
             for coc_path, dep_path, imgb_path, af_path\
                 in zip(coc_paths, depth_paths, imgb_paths, af_paths):
@@ -160,10 +156,10 @@ def main(coc_paths, depth_paths, imgb_paths, af_paths, f, fnum, FOR_SUPP=False):
     print(f"s: {s}, gs: {gs}")
 
     if not FOR_SUPP:
-        os.makedirs(f"../resutls/{CAMERA_TYPE}_{scene_name}/", exist_ok=True)
+        os.makedirs(f"../results/{CAMERA_TYPE}_{scene_name}/", exist_ok=True)
 
         # save result to text
-        with open(f"../resutls/{CAMERA_TYPE}_{scene_name}/{f}F{fnum}_s.txt", "w", encoding="utf-8") as f:
+        with open(f"../results/{CAMERA_TYPE}_{scene_name}/{f}F{fnum}_s.txt", "w", encoding="utf-8") as f:
             for view in views_selected:
                 f.write(f"{view.idnum} {view.s} {view.g}\n")
             f.write(f"multiview| s: {s}  gs: {gs}\n")
@@ -179,15 +175,12 @@ parser.add_argument("--scene", type=int, default=1)
 
 scene_id = parser.parse_args().scene
 
-#workspace2021ashidadp_matomeQualitativeAFpointDSLRScene2/35.0F1.4_001.npy
-for f in [35.0, 50.0, 85.0][:1]:
+for f in [35.0, 50.0, 85.0][:]:
     for fnum in [1.4, 1.8, 4.0, 8.0][:]:
-        for scene_name in ["Scene1", "Scene2", "Scene3", "Scene4", "Scene5", "Scene6"][(scene_id-1)*2:scene_id*2]:
-            # coc_paths = glob.glob(f"../Results_qualitative/{CAMERA_TYPE}/{scene_name}/{f}F{fnum}/*")
+        for scene_name in ["Scene1", "Scene2", "Scene3", "Scene4", "Scene5", "Scene6"][(scene_id-1):scene_id]:
             coc_paths = glob.glob(f"../blur_results/{CAMERA_TYPE}/{scene_name}/{f}F{fnum}/*")
-
-            depth_paths = glob.glob(f"../Qualitative/{CAMERA_TYPE}/{scene_name}/depth/{f}F{fnum}_*.tif")
-            imgb_paths = glob.glob(f"../Qualitative/{CAMERA_TYPE}/{scene_name}/{f}F{fnum}/{f}F{fnum}_*_B.JPG")
+            depth_paths = glob.glob(f"../datasets/{CAMERA_TYPE}/{scene_name}/depth/{f}F{fnum}_*.tif")
+            imgb_paths = glob.glob(f"../datasets/{CAMERA_TYPE}/{scene_name}/{f}F{fnum}/{f}F{fnum}_*_B.JPG")
 
             # dummy
             AF_paths = [None for _ in range(len(coc_paths))]

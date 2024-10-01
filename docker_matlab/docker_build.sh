@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t  matlab-python . --no-cache
+docker build -t  dp-sfm-matlab-python .

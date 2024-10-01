@@ -1,9 +1,7 @@
 import argparse
 import os
-import glob
 import matlab.engine
 import io
-
 
 
 def run_matlab(img_path, mode, select_folder, save_path):
@@ -57,7 +55,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--img_path", type=str, required=True)
     parser.add_argument("--mode", type=str, default="DSLR")
-    parser.add_argument("--select_folder", type=str, default="Qualitative")
+    parser.add_argument("--select_folder", type=str, default="datasets")
     parser.add_argument("--save_path", type=str, default="blur_results")
 
     args = parser.parse_args()

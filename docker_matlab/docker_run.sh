@@ -5,5 +5,5 @@ docker run  \
         -itd --rm \
 	-u $(id -u $username):$(id -g $username) \
         -v $PWD/../:/home/${username}/matlab \
-        matlab-python\
+        dp-sfm-matlab-python\
         /bin/bash

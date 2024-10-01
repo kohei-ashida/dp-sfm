@@ -16,5 +16,4 @@ def crop_for_ddd(img, patch_size=111, stride=33):
 
     img_crop = img[rowmax[0]-mids:rowmax[-1] +
                    mids+1, colmax[0]-mids:colmax[-1]+mids+1]
-    # print(img_crop.shape)
     return img_crop

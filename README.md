@@ -28,7 +28,7 @@ Install the MATLAB engine API in python and run `python3 estimate_blur.py`.
 
 ###  Estimate the scale
 ```
-cd ./docker/ && ./docker_run.sh
+cd ./docker/ && ./docker_build.sh && ./docker_run.sh
 docker exec -it dp-sfm-cupy bash
 python3 run_eccv_DSLR.py --scene scene_id
 python3 run_eccv_PHONE.py --scene scene_id

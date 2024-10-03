@@ -1,7 +1,7 @@
 
 function foldername = step1(imgname, image_resize_val, stride, patch_size, ker_size, border)
     addpath(genpath('functions'));
-    select_folder = 'Qualitative'; % input folder
+    select_folder = 'datasets'; % input folder
     save_path = 'Results_qualitative'; % results folder
     save_path = 'blur_results';
     ext = "JPG";
